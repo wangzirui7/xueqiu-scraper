@@ -31,7 +31,16 @@ def load_cookies() -> str:
         sys.exit(1)
 
     with open(STATE_FILE) as f:
-        cookies = json.load(f)
+        data = json.load(f)
+
+    # 支持两种格式：Playwright state dict 或纯 cookie list
+    if isinstance(data, list):
+        cookies = data
+    elif isinstance(data, dict) and "cookies" in data:
+        cookies = data["cookies"]
+    else:
+        print(f"未知的 Cookie 格式: {STATE_FILE}", file=sys.stderr)
+        sys.exit(1)
 
     return "; ".join([f"{c['name']}={c['value']}" for c in cookies])
 
